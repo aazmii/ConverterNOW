@@ -51,6 +51,7 @@ dependencies:
   # App translations
   translations:
     path: packages/translations
+  window_manager: ^0.4.3
 
 dev_dependencies:
   flutter_lints: ^5.0.0

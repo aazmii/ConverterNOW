@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:converterpro/app_router.dart';
 import 'package:converterpro/styles/consts.dart';
+import 'package:converterpro/utils/window_size.dart' show PersistantWindow;
+import 'package:converterpro/utils/window_size_utils.dart' show WindowSize;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:converterpro/models/settings.dart';
@@ -8,6 +10,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:translations/app_localizations.dart';
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:window_manager/window_manager.dart' show WindowOptions, windowManager;
 
 void main() async {
   LicenseRegistry.addLicense(() async* {
@@ -18,7 +21,20 @@ void main() async {
   });
 
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const ProviderScope(child: MyApp()));
+  await windowManager.ensureInitialized();
+  // Set up window options
+  WindowOptions windowOptions = const WindowOptions(
+    size: Size(800, 600), // Default size
+    center: true, // Center the window by default
+  );
+  // Initialize the window
+  await windowManager.waitUntilReadyToShow(windowOptions, () async {
+    await windowManager.show();
+    await windowManager.focus();
+  });
+  await WindowSize.restoreWindowPosition();
+  runApp(const ProviderScope(child: PersistantWindow(child: MyApp())));
+  // runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends ConsumerWidget {

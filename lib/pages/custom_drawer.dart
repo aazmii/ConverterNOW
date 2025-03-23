@@ -8,6 +8,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:translations/app_localizations.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vector_graphics/vector_graphics.dart';
+import 'package:window_manager/window_manager.dart';
+
+import '../utils/window_size_utils.dart';
 
 class CustomDrawer extends ConsumerWidget {
   final bool isDrawerFixed;
@@ -57,7 +60,14 @@ class CustomDrawer extends ConsumerWidget {
     );
     headerDrawer.add(isDrawerFixed
         ? InkWell(
-            onTap: () => context.go('/'),
+            onTap: () async {
+              try {
+                await WindowSize.saveWindowPosition();
+              } catch (e) {
+                print(e);
+              }
+              // context.go('/');
+            },
             child: title,
           )
         : title);
@@ -119,8 +129,7 @@ class CustomDrawer extends ConsumerWidget {
       ),
     );
 
-    List<PROPERTYX>? propertiesOrdering =
-        ref.watch(PropertiesOrderNotifier.provider).valueOrNull;
+    List<PROPERTYX>? propertiesOrdering = ref.watch(PropertiesOrderNotifier.provider).valueOrNull;
 
     if (propertiesOrdering == null) {
       return const SizedBox();
@@ -142,8 +151,7 @@ class CustomDrawer extends ConsumerWidget {
     });
 
     // How many NavigationDrawerDestination elements are there in the drawer
-    int headerElements =
-        headerDrawer.whereType<NavigationDrawerDestination>().toList().length;
+    int headerElements = headerDrawer.whereType<NavigationDrawerDestination>().toList().length;
 
     return NavigationDrawer(
       selectedIndex: pathToNavigationIndex(
@@ -153,8 +161,7 @@ class CustomDrawer extends ConsumerWidget {
       ),
       onDestinationSelected: (int selectedPage) {
         if (selectedPage >= headerElements) {
-          context.go(
-              '/conversions/${propertiesOrdering[selectedPage - headerElements].toKebabCase()}');
+          context.go('/conversions/${propertiesOrdering[selectedPage - headerElements].toKebabCase()}');
           if (!isDrawerFixed) {
             Navigator.of(context).pop();
           }
@@ -185,16 +192,13 @@ class CustomDrawer extends ConsumerWidget {
   }
 }
 
-int pathToNavigationIndex(BuildContext context, bool isDrawerFixed,
-    Map<PROPERTYX, int> inversePropertiesOrdering) {
+int pathToNavigationIndex(BuildContext context, bool isDrawerFixed, Map<PROPERTYX, int> inversePropertiesOrdering) {
   final String location = GoRouterState.of(context).uri.toString();
 
   // 3 elements in the header
   if (isDrawerFixed) {
     if (location.startsWith('/conversions/')) {
-      return computeSelectedConversionPage(
-              context, inversePropertiesOrdering)! +
-          3;
+      return computeSelectedConversionPage(context, inversePropertiesOrdering)! + 3;
     } else {
       return 2; // Settings
     }
@@ -202,9 +206,7 @@ int pathToNavigationIndex(BuildContext context, bool isDrawerFixed,
   // 1 element in the header
   else {
     if (location.startsWith('/conversions/')) {
-      return computeSelectedConversionPage(
-              context, inversePropertiesOrdering)! +
-          1;
+      return computeSelectedConversionPage(context, inversePropertiesOrdering)! + 1;
     } else {
       return 0; // Settings
     }
