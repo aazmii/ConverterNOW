@@ -62,7 +62,7 @@ class CustomDrawer extends ConsumerWidget {
         ? InkWell(
             onTap: () async {
               try {
-                await WindowSize.saveWindowPosition();
+                await AppWindowListener.saveWindowPosition();
               } catch (e) {
                 print(e);
               }

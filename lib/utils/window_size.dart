@@ -28,6 +28,6 @@ class _PersistantWindowState extends State<PersistantWindow> with WindowListener
   void onWindowClose() async {
     // Save the window's position and size before closing
     super.onWindowClose();
-    await WindowSize.saveWindowPosition();
+    await AppWindowListener.saveWindowPosition();
   }
 }

@@ -1,8 +1,9 @@
 import 'dart:io';
 import 'package:converterpro/app_router.dart';
 import 'package:converterpro/styles/consts.dart';
+import 'package:converterpro/utils/demo.app.dart';
 import 'package:converterpro/utils/window_size.dart' show PersistantWindow;
-import 'package:converterpro/utils/window_size_utils.dart' show WindowSize;
+import 'package:converterpro/utils/window_size_utils.dart' show AppWindowListener, WindowSize;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:converterpro/models/settings.dart';
@@ -23,17 +24,19 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
   // Set up window options
-  WindowOptions windowOptions = const WindowOptions(
-    size: Size(800, 600), // Default size
-    center: true, // Center the window by default
-  );
+  windowManager.setPreventClose(true);
+  windowManager.addListener(AppWindowListener());
+  WindowOptions windowOptions = const WindowOptions(size: Size(800, 600), center: true);
   // Initialize the window
   await windowManager.waitUntilReadyToShow(windowOptions, () async {
     await windowManager.show();
     await windowManager.focus();
   });
-  await WindowSize.restoreWindowPosition();
-  runApp(const ProviderScope(child: PersistantWindow(child: MyApp())));
+  await AppWindowListener.restoreWindowPosition();
+  runApp(MaterialApp(
+    home: const Scaffold(),
+  ));
+  //  runApp(const ProviderScope(child: PersistantWindow(child: MyApp())));
   // runApp(const ProviderScope(child: MyApp()));
 }
 
@@ -42,12 +45,10 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return DynamicColorBuilder(
-        builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+    return DynamicColorBuilder(builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
       if (lightDynamic != null) {
         WidgetsBinding.instance.addPostFrameCallback(
-          (_) => ref.read(deviceAccentColorProvider.notifier).state =
-              lightDynamic.primary,
+          (_) => ref.read(deviceAccentColorProvider.notifier).state = lightDynamic.primary,
         );
       }
 
@@ -58,8 +59,7 @@ class MyApp extends ConsumerWidget {
 
         ThemeData lightTheme, darkTheme;
         // Use device accent color
-        if (ref.watch(deviceAccentColorProvider) != null &&
-            themeColor.useDeviceColor) {
+        if (ref.watch(deviceAccentColorProvider) != null && themeColor.useDeviceColor) {
           lightTheme = ThemeData(
             colorScheme: lightDynamic!.harmonized(),
           );
@@ -91,25 +91,18 @@ class MyApp extends ConsumerWidget {
             TargetPlatform.android: PredictiveBackPageTransitionsBuilder(),
           },
         );
-        lightTheme =
-            lightTheme.copyWith(pageTransitionsTheme: pageTransitionsTheme);
-        darkTheme =
-            darkTheme.copyWith(pageTransitionsTheme: pageTransitionsTheme);
-        amoledTheme =
-            amoledTheme.copyWith(pageTransitionsTheme: pageTransitionsTheme);
-        final themeMode = ref.watch(CurrentThemeMode.provider).valueOrNull ??
-            ThemeMode.system;
+        lightTheme = lightTheme.copyWith(pageTransitionsTheme: pageTransitionsTheme);
+        darkTheme = darkTheme.copyWith(pageTransitionsTheme: pageTransitionsTheme);
+        amoledTheme = amoledTheme.copyWith(pageTransitionsTheme: pageTransitionsTheme);
+        final themeMode = ref.watch(CurrentThemeMode.provider).valueOrNull ?? ThemeMode.system;
 
         // Workaround until https://github.com/flutter/flutter/issues/39998 got
         // resolved
-        String deviceLocaleLanguageCode =
-            kIsWeb ? 'en' : Platform.localeName.split('_')[0];
+        String deviceLocaleLanguageCode = kIsWeb ? 'en' : Platform.localeName.split('_')[0];
         Locale appLocale;
         if (settingsLocale != null) {
           appLocale = settingsLocale;
-        } else if (mapLocale.keys
-            .map((Locale locale) => locale.languageCode)
-            .contains(deviceLocaleLanguageCode)) {
+        } else if (mapLocale.keys.map((Locale locale) => locale.languageCode).contains(deviceLocaleLanguageCode)) {
           appLocale = Locale(deviceLocaleLanguageCode);
         } else {
           appLocale = const Locale('en');
@@ -125,9 +118,7 @@ class MyApp extends ConsumerWidget {
           title: 'Converter NOW',
           themeMode: themeMode,
           theme: lightTheme,
-          darkTheme: (ref.watch(IsDarkAmoled.provider).valueOrNull ?? false)
-              ? amoledTheme
-              : darkTheme,
+          darkTheme: (ref.watch(IsDarkAmoled.provider).valueOrNull ?? false) ? amoledTheme : darkTheme,
           supportedLocales: mapLocale.keys,
           localizationsDelegates: AppLocalizations.localizationsDelegates,
           locale: appLocale,

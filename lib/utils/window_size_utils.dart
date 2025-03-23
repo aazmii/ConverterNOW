@@ -1,13 +1,19 @@
 import 'dart:developer';
 import 'dart:ui' show Offset;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show Size;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:window_manager/window_manager.dart' show windowManager;
+import 'package:window_manager/window_manager.dart';
 
-class WindowSize {
+class AppWindowListener extends WindowListener {
   ///Gets called when quitting the app, saving window position and size
+  @override
+  void onWindowClose() async {
+    // Save the window's position and size before closing
+    super.onWindowClose();
+    await saveWindowPosition();
+  }
+
   static Future<void> saveWindowPosition() async {
     final prefs = await SharedPreferences.getInstance();
     final position = await windowManager.getPosition();
@@ -20,6 +26,7 @@ class WindowSize {
     await prefs.setDouble('window_y', position.dy);
     await prefs.setDouble('window_width', size.width);
     await prefs.setDouble('window_height', size.height);
+    windowManager.destroy();
   }
 
 // Restore the window's position and size
