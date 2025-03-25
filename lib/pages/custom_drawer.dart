@@ -1,16 +1,13 @@
+import 'package:converterpro/data/property_unit_maps.dart';
 import 'package:converterpro/models/order.dart';
 import 'package:converterpro/utils/navigator_utils.dart';
-import 'package:converterpro/data/property_unit_maps.dart';
 import 'package:converterpro/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:translations/app_localizations.dart';
 import 'package:go_router/go_router.dart';
+import 'package:translations/app_localizations.dart';
 import 'package:vector_graphics/vector_graphics.dart';
-import 'package:window_manager/window_manager.dart';
-
-import '../utils/window_size_utils.dart';
 
 class CustomDrawer extends ConsumerWidget {
   final bool isDrawerFixed;
@@ -61,12 +58,7 @@ class CustomDrawer extends ConsumerWidget {
     headerDrawer.add(isDrawerFixed
         ? InkWell(
             onTap: () async {
-              try {
-                await AppWindowListener.saveWindowPosition();
-              } catch (e) {
-                print(e);
-              }
-              // context.go('/');
+              context.go('/');
             },
             child: title,
           )

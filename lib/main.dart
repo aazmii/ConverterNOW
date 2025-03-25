@@ -1,17 +1,16 @@
 import 'dart:io';
+
 import 'package:converterpro/app_router.dart';
-import 'package:converterpro/styles/consts.dart';
-import 'package:converterpro/utils/demo.app.dart';
-import 'package:converterpro/utils/window_size.dart' show PersistantWindow;
-import 'package:converterpro/utils/window_size_utils.dart' show AppWindowListener, WindowSize;
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
 import 'package:converterpro/models/settings.dart';
+import 'package:converterpro/styles/consts.dart';
+import 'package:converterpro/helpers/app_window_manager.dart';
+import 'package:dynamic_color/dynamic_color.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:translations/app_localizations.dart';
-import 'package:dynamic_color/dynamic_color.dart';
-import 'package:window_manager/window_manager.dart' show WindowOptions, windowManager;
+import 'package:window_manager/window_manager.dart' show windowManager;
 
 void main() async {
   LicenseRegistry.addLicense(() async* {
@@ -22,22 +21,13 @@ void main() async {
   });
 
   WidgetsFlutterBinding.ensureInitialized();
-  await windowManager.ensureInitialized();
-  // Set up window options
-  windowManager.setPreventClose(true);
-  windowManager.addListener(AppWindowListener());
-  WindowOptions windowOptions = const WindowOptions(size: Size(800, 600), center: true);
-  // Initialize the window
-  await windowManager.waitUntilReadyToShow(windowOptions, () async {
-    await windowManager.show();
-    await windowManager.focus();
-  });
-  await AppWindowListener.restoreWindowPosition();
-  runApp(MaterialApp(
-    home: const Scaffold(),
-  ));
-  //  runApp(const ProviderScope(child: PersistantWindow(child: MyApp())));
-  // runApp(const ProviderScope(child: MyApp()));
+
+  if (Platform.isWindows || Platform.isMacOS) {
+    await windowManager.ensureInitialized();
+    await AppWindowManager.setupWindowManagement();
+  }
+
+  runApp(const ProviderScope(child: MyApp()));
 }
 
 class MyApp extends ConsumerWidget {
