@@ -22,9 +22,9 @@ void main() async {
 
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (Platform.isWindows || Platform.isMacOS) {
+  if (Platform.isWindows) {
     await windowManager.ensureInitialized();
-    await AppWindowManager.setupWindowManagement();
+    await AppWindowManager.setupWindowPersistence();
   }
 
   runApp(const ProviderScope(child: MyApp()));

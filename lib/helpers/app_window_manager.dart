@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:window_manager/window_manager.dart';
 
 class AppWindowManager {
-  static Future<void> setupWindowManagement() async {
+  static Future<void> setupWindowPersistence() async {
     windowManager.setPreventClose(true);
     windowManager.addListener(_WindowEventHandler());
     await _restoreWindowPosition();
@@ -32,6 +32,7 @@ class AppWindowManager {
       await windowManager.setPosition(Offset(x, y));
       await windowManager.setSize(Size(width, height));
     } else {
+      // Default window size & position
       WindowOptions windowOptions = const WindowOptions(size: Size(800, 600), center: true);
       await windowManager.waitUntilReadyToShow(windowOptions, () async {
         await windowManager.show();
